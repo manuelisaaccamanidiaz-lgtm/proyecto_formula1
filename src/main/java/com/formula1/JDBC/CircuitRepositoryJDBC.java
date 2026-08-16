@@ -7,23 +7,27 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.formula1.repositories.TeamRepository;
+import com.formula1.circuits.Circuit;
+import com.formula1.factories.CircuitFactory;
+import com.formula1.repositories.CircuitRepository;
 import com.formula1.teams.Team;
 
-public class TeamRepositoryJDBC implements TeamRepository{
+public class CircuitRepositoryJDBC implements CircuitRepository {
     private Connection conexion;
 
-    public TeamRepositoryJDBC(Connection conexion) {
+    public CircuitRepositoryJDBC(Connection conexion) {
         this.conexion = conexion;
     }
 
     //guardar vehiculo con cada dato
     @Override
-    public void guardar(Team equipo) {
-        String sql = "INSERT INTO team (nombre, pais) VALUES (?, ?)";
+    public void guardar(Circuit circuito) {
+        String sql = "INSERT INTO team (nombre, longitud_km, descripcion, vueltas) VALUES (?, ?, ? , ?)";
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setString(1, equipo.getNombre());
-            stmt.setString(2, equipo.getPais());
+            stmt.setString(1, circuito.getNombre());
+            stmt.setDouble(2, circuito.getLongitud_km());
+            stmt.setString(3, circuito.getDescripcion());
+            stmt.setInt(4, circuito.getVueltas());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -33,53 +37,57 @@ public class TeamRepositoryJDBC implements TeamRepository{
     // buscarPorId, listarTodos y eliminar quedan como tu ejercicio
     //buscar vehiculo por id, se ingresa un ide y se hace la consulta en mysql
     @Override
-    public Team buscarPorId(int idVehiculo) {
-        String sql = "SELECT id_vehiculo, motor, modelo, aceleracion, velocidad_maxima, id_equipo FROM vehicle WHERE id_vehiculo = ?";
-        Team equipo = null; // por si no se encuentra nada
+    public Circuit buscarPorId(int idCircuito) {
+        String sql = "SELECT id_circuito, nombre, longitud_km, descripcion, vueltas FROM circuit WHERE id_circuito = ?";
+        Circuit circuito = null; // por si no se encuentra nada
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setInt(1, idVehiculo);
+            stmt.setInt(1, idCircuito);
             ResultSet rs = stmt.executeQuery(); // aquí SÍ guardas el resultado
             if (rs.next()) {
-                equipo = new Team(
-                        rs.getInt("id_equipo"),
+                circuito = new Circuit(
+                        rs.getInt("id_circuito"),
                         rs.getString("nombre"),
-                        rs.getString("pais")
+                        rs.getDouble("longitud_km"),
+                        rs.getString("descripcion"),
+                        rs.getByte("vueltas")
                 );
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return equipo; // fuera del try-catch, así siempre hay un return
+        return circuito; // fuera del try-catch, así siempre hay un return
     }
 
     //listar todos los vehiculos, consulta para traer todas las columnas de la tabla vehiculos
     @Override
-    public List<Team> listarTodos() {
-        String sql = "SELECT id_vehiculo, motor, modelo, aceleracion, velocidad_maxima, id_equipo FROM vehicle";
-        List<Team> equipoList = new ArrayList<>(); // la lista donde vas acumulando
+    public List<Circuit> listarTodos() {
+        String sql = "SELECT id_circuito, nombre, longitud_km, descripcion, vueltas FROM circuit";
+        List<Circuit> circuitoList = new ArrayList<>(); // la lista donde vas acumulando
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 // arma un Vehicle igual que en buscarPorId...
                 // y agrégalo a la lista con vehiculos.add(...)
-                Team equipo = new Team(
-                        rs.getInt("id_equipo"),
+                Circuit circuito = new Circuit(
+                        rs.getInt("id_circuito"),
                         rs.getString("nombre"),
-                        rs.getString("pais"));
-                equipoList.add(equipo);
+                        rs.getDouble("longitud_km"),
+                        rs.getString("descripcion"),
+                        rs.getByte("vueltas"));
+                circuitoList.add(circuito);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return equipoList;
+        return circuitoList;
     }
 
     //eliminar algun vehiculo
     @Override
-    public void eliminar(int idEquipo) {
+    public void eliminar(int idCircuito) {
         String sql = "DELETE FROM vehicle WHERE id_vehiculo = ? ";
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setInt(1, idEquipo);
+            stmt.setInt(1, idCircuito);
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

@@ -2,18 +2,18 @@ package com.formula1.circuits;
 
 public class Circuit {
 
-    private int ID_circuito;
+    private int idCircuito;
     private String nombre;
     private double longitud_km;
     private String descripcion;
     private byte vueltas;
 
-    public int getID_circuito() {
-        return ID_circuito;
+    public int getIdCircuito() {
+        return idCircuito;
     }
 
-    public void setID_circuito(int iD_circuito) {
-        ID_circuito = iD_circuito;
+    public void setIdCircuito(int idCircuito) {
+        this.idCircuito = idCircuito;
     }
 
     public String getNombre() {
@@ -48,8 +48,8 @@ public class Circuit {
         this.vueltas = vueltas;
     }
 
-    public Circuit(int iD_circuito, String nombre, double longitud_km, String descripcion, byte vueltas) {
-        ID_circuito = iD_circuito;
+    public Circuit(int idCircuito, String nombre, double longitud_km, String descripcion, byte vueltas) {
+        this.idCircuito = idCircuito;
         this.nombre = nombre;
         this.longitud_km = longitud_km;
         this.descripcion = descripcion;
@@ -58,5 +58,7 @@ public class Circuit {
 
     public Circuit() {
     }
+
+    
 
 }
