@@ -8,9 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.formula1.circuits.Circuit;
-import com.formula1.factories.CircuitFactory;
 import com.formula1.repositories.CircuitRepository;
-import com.formula1.teams.Team;
 
 public class CircuitRepositoryJDBC implements CircuitRepository {
     private Connection conexion;
@@ -85,7 +83,7 @@ public class CircuitRepositoryJDBC implements CircuitRepository {
     //eliminar algun vehiculo
     @Override
     public void eliminar(int idCircuito) {
-        String sql = "DELETE FROM vehicle WHERE id_vehiculo = ? ";
+        String sql = "DELETE FROM circuit WHERE id_circuito = ? ";
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
             stmt.setInt(1, idCircuito);
             stmt.executeUpdate();

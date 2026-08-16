@@ -2,16 +2,27 @@ package com.formula1.pilots;
 
 public class Pilot {
 
-    private int ID_pilot;
+    private int idPiloto;
     private String nombre;
     private String rol;
+    private int idEquipo;
+    private int idVehiculo;
 
-    public int getID_pilot() {
-        return ID_pilot;
+    public Pilot(int idPiloto,String nombre,String rol, int idEquipo,  int idVehiculo) {
+        this.idEquipo = idEquipo;
+        this.idPiloto = idPiloto;
+        this.idVehiculo = idVehiculo;
+        this.nombre = nombre;
+        this.rol = rol;
     }
 
-    public void setID_pilot(int iD_pilot) {
-        ID_pilot = iD_pilot;
+
+    public int getIdPiloto() {
+        return idPiloto;
+    }
+
+    public void setIdPiloto(int idPiloto) {
+        this.idPiloto = idPiloto;
     }
 
     public String getNombre() {
@@ -30,13 +41,26 @@ public class Pilot {
         this.rol = rol;
     }
 
-    public Pilot(int iD_pilot, String nombre, String rol) {
-        ID_pilot = iD_pilot;
-        this.nombre = nombre;
-        this.rol = rol;
+    public int getIdEquipo() {
+        return idEquipo;
     }
+
+    public void setIdEquipo(int idEquipo) {
+        this.idEquipo = idEquipo;
+    }
+
+    public int getIdVehiculo() {
+        return idVehiculo;
+    }
+
+    public void setIdVehiculo(int idVehiculo) {
+        this.idVehiculo = idVehiculo;
+    }
+    
 
     public Pilot() {
     }
+
+    
 
 }
