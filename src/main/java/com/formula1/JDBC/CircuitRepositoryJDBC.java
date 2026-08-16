@@ -20,7 +20,7 @@ public class CircuitRepositoryJDBC implements CircuitRepository {
     //guardar vehiculo con cada dato
     @Override
     public void guardar(Circuit circuito) {
-        String sql = "INSERT INTO team (nombre, longitud_km, descripcion, vueltas) VALUES (?, ?, ? , ?)";
+        String sql = "INSERT INTO circuit (nombre, longitud_km, descripcion, vueltas) VALUES (?, ?, ? , ?)";
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
             stmt.setString(1, circuito.getNombre());
             stmt.setDouble(2, circuito.getLongitud_km());

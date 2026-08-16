@@ -33,11 +33,11 @@ public class TeamRepositoryJDBC implements TeamRepository{
     // buscarPorId, listarTodos y eliminar quedan como tu ejercicio
     //buscar vehiculo por id, se ingresa un ide y se hace la consulta en mysql
     @Override
-    public Team buscarPorId(int idVehiculo) {
-        String sql = "SELECT id_vehiculo, motor, modelo, aceleracion, velocidad_maxima, id_equipo FROM vehicle WHERE id_vehiculo = ?";
+    public Team buscarPorId(int idTeam) {
+        String sql = "SELECT id_equipo, nombre, pais FROM team WHERE id_vehiculo = ?";
         Team equipo = null; // por si no se encuentra nada
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setInt(1, idVehiculo);
+            stmt.setInt(1, idTeam);
             ResultSet rs = stmt.executeQuery(); // aquí SÍ guardas el resultado
             if (rs.next()) {
                 equipo = new Team(
@@ -55,7 +55,7 @@ public class TeamRepositoryJDBC implements TeamRepository{
     //listar todos los vehiculos, consulta para traer todas las columnas de la tabla vehiculos
     @Override
     public List<Team> listarTodos() {
-        String sql = "SELECT id_vehiculo, motor, modelo, aceleracion, velocidad_maxima, id_equipo FROM vehicle";
+        String sql = "SELECT id_equipo, nombre, pais FROM team";
         List<Team> equipoList = new ArrayList<>(); // la lista donde vas acumulando
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
@@ -77,7 +77,7 @@ public class TeamRepositoryJDBC implements TeamRepository{
     //eliminar algun vehiculo
     @Override
     public void eliminar(int idEquipo) {
-        String sql = "DELETE FROM vehicle WHERE id_vehiculo = ? ";
+        String sql = "DELETE FROM team WHERE id_equipo = ? ";
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
             stmt.setInt(1, idEquipo);
             stmt.executeUpdate();

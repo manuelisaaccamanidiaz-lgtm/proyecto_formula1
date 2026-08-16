@@ -7,25 +7,24 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.formula1.pilots.Pilot;
-import com.formula1.repositories.PilotRepository;
+import com.formula1.repositories.ResultRepository;
+import com.formula1.results.Result;
 
-public class PilotRepositoryJDBC implements PilotRepository{
+public class ResultRepositoryJDBC implements ResultRepository {
     private Connection conexion;
 
-    public PilotRepositoryJDBC(Connection conexion) {
+    public ResultRepositoryJDBC(Connection conexion) {
         this.conexion = conexion;
     }
 
     //guardar vehiculo con cada dato
     @Override
-    public void guardar(Pilot piloto) {
-        String sql = "INSERT INTO pilot (nombre, rol, id_equipo, id_vehiculo) VALUES (?, ?, ? , ?)";
+    public void guardar(Result resultado) {
+        String sql = "INSERT INTO team (tiempo, id_circuito, id_vehiculo) VALUES (?, ?, ? )";
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setString(1, piloto.getNombre());
-            stmt.setString(2, piloto.getRol());
-            stmt.setInt(3, piloto.getIdEquipo());
-            stmt.setInt(4, piloto.getIdVehiculo());
+            stmt.setDouble(1, resultado.getTiempo());
+            stmt.setInt(2, resultado.getIdCircuito());
+            stmt.setInt(3, resultado.getIdVehiculo());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -35,58 +34,56 @@ public class PilotRepositoryJDBC implements PilotRepository{
     // buscarPorId, listarTodos y eliminar quedan como tu ejercicio
     //buscar vehiculo por id, se ingresa un ide y se hace la consulta en mysql
     @Override
-    public Pilot buscarPorId(int idPiloto) {
-        String sql = "SELECT id_piloto, nombre, rol, id_equipo, id_vehiculo FROM pilot WHERE id_piloto = ?";
-        Pilot piloto = null; // por si no se encuentra nada
+    public Result buscarPorId(int idResult) {
+        String sql = "SELECT id_result, tiempo, id_circuito, id_vehiculo FROM result WHERE id_result = ?";
+        Result resultado = null; // por si no se encuentra nada
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setInt(1, idPiloto);
+            stmt.setInt(1, idResult);
             ResultSet rs = stmt.executeQuery(); // aquí SÍ guardas el resultado
             if (rs.next()) {
-                piloto = new Pilot(
-                        rs.getInt("idPiloto"),
-                        rs.getString("nombre"),
-                        rs.getString("rol"),
-                        rs.getInt("idEquipo"),
+                resultado = new Result(
+                        rs.getInt("idResult"),
+                        rs.getDouble("tiempo"),
+                        rs.getInt("idCircuito"),
                         rs.getInt("idVehiculo")
                 );
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return piloto; // fuera del try-catch, así siempre hay un return
+        return resultado; // fuera del try-catch, así siempre hay un return
     }
 
     //listar todos los vehiculos, consulta para traer todas las columnas de la tabla vehiculos
     @Override
-    public List<Pilot> listarTodos() {
-        String sql = "SELECT id_piloto, nombre, rol, id_equipo, id_vehiculo FROM pilot";
-        List<Pilot> pilotos = new ArrayList<>(); // la lista donde vas acumulando
+    public List<Result> listarTodos() {
+        String sql = "SELECT id_result, tiempo, id_circuito, id_vehiculo FROM result";
+        List<Result> resultados = new ArrayList<>(); // la lista donde vas acumulando
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 // arma un Vehicle igual que en buscarPorId...
                 // y agrégalo a la lista con vehiculos.add(...)
-                Pilot piloto = new Pilot(
-                        rs.getInt("idPiloto"),
-                        rs.getString("nombre"),
-                        rs.getString("rol"),
-                        rs.getInt("idEquipo"),
+                Result resultado = new Result(
+                        rs.getInt("idResult"),
+                        rs.getDouble("tiempo"),
+                        rs.getInt("idCircuito"),
                         rs.getInt("idVehiculo")
                 );
-                pilotos.add(piloto);
+                resultados.add(resultado);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return pilotos;
+        return resultados;
     }
 
     //eliminar algun vehiculo
     @Override
-    public void eliminar(int idPilot) {
-        String sql = "DELETE FROM pilot WHERE id_piloto = ? ";
+    public void eliminar(int idResult) {
+        String sql = "DELETE FROM result WHERE id_result = ? ";
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
-            stmt.setInt(1, idPilot);
+            stmt.setInt(1, idResult);
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

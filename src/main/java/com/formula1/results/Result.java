@@ -1,52 +1,53 @@
 package com.formula1.results;
 
 public class Result {
-    private int ID_result;
-    private String ganador;
-    private double record_vuelta;
+    private int idResult;
     private double tiempo;
-    private String circuito;
+    private int idCircuito;
+    private int idVehiculo;
 
-    public int getID_result() {
-        return ID_result;
+    public Result(int idResult,double tiempo,int idCircuito,  int idVehiculo) {
+        this.idCircuito = idCircuito;
+        this.idResult = idResult;
+        this.idVehiculo = idVehiculo;
+        this.tiempo = tiempo;
     }
-    public void setID_result(int iD_result) {
-        ID_result = iD_result;
-    }    
 
-    public String getGanador() {
-        return ganador;
+    public Result() {
     }
-    public void setGanador(String ganador) {
-        this.ganador = ganador;
+
+    public int getIdResult() {
+        return idResult;
     }
-    public double getRecord_vuelta() {
-        return record_vuelta;
+
+    public void setIdResult(int idResult) {
+        this.idResult = idResult;
     }
-    public void setRecord_vuelta(double record_vuelta) {
-        this.record_vuelta = record_vuelta;
-    }
+
     public double getTiempo() {
         return tiempo;
     }
+
     public void setTiempo(double tiempo) {
         this.tiempo = tiempo;
     }
-    public String getCircuito() {
-        return circuito;
+
+    public int getIdCircuito() {
+        return idCircuito;
     }
-    public void setCircuito(String circuito) {
-        this.circuito = circuito;
+
+    public void setIdCircuito(int idCircuito) {
+        this.idCircuito = idCircuito;
     }
+
+    public int getIdVehiculo() {
+        return idVehiculo;
+    }
+
+    public void setIdVehiculo(int idVehiculo) {
+        this.idVehiculo = idVehiculo;
+    }
+
     
-    public Result(int iD_result, String ganador, double record_vuelta, double tiempo, String circuito) {
-        ID_result = iD_result;
-        this.ganador = ganador;
-        this.record_vuelta = record_vuelta;
-        this.tiempo = tiempo;
-        this.circuito = circuito;
-    }
-    public Result() {
-    }
 
 }
