@@ -6,7 +6,20 @@ public class Vehicle {
     private String motor;
     private String modelo;
     private double aceleracion;
-    private int velocidad_maxima;
+    private int velocidadMaxima;
+    private int idEquipo;
+
+    public Vehicle(int id_vehiculo,String motor,String modelo, double aceleracion, int velocidadMaxima, int idEquipo) {
+        this.aceleracion = aceleracion;
+        
+        this.id_vehiculo = id_vehiculo;
+        this.modelo = modelo;
+        this.motor = motor;
+        this.velocidadMaxima = velocidadMaxima;
+        this.idEquipo = idEquipo;
+    }
+
+
 
     public int getId_vehiculo() {
         return id_vehiculo;
@@ -40,23 +53,24 @@ public class Vehicle {
         this.aceleracion = aceleracion;
     }
 
-    public int getVelocidad_maxima() {
-        return velocidad_maxima;
+    public int getVelocidadMaxima() {
+        return velocidadMaxima;
     }
 
-    public void setVelocidad_maxima(int velocidad_maxima) {
-        this.velocidad_maxima = velocidad_maxima;
+    public void setVelocidadMaxima(int velocidadMaxima) {
+        this.velocidadMaxima = velocidadMaxima;
+    }
+    
+    public int getIdEquipo() {
+        return idEquipo;
     }
 
-    public Vehicle(int id_vehiculo, String motor, String modelo, double aceleracion, int velocidad_maxima) {
-        this.id_vehiculo = id_vehiculo;
-        this.motor = motor;
-        this.modelo = modelo;
-        this.aceleracion = aceleracion;
-        this.velocidad_maxima = velocidad_maxima;
+    public void setIdEquipo(int idEquipo) {
+        this.idEquipo = idEquipo;
     }
+
+    
 
     public Vehicle() {
     }
-
 }
