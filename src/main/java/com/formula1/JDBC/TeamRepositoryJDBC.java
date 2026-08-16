@@ -34,7 +34,7 @@ public class TeamRepositoryJDBC implements TeamRepository{
     //buscar vehiculo por id, se ingresa un ide y se hace la consulta en mysql
     @Override
     public Team buscarPorId(int idTeam) {
-        String sql = "SELECT id_equipo, nombre, pais FROM team WHERE id_vehiculo = ?";
+        String sql = "SELECT id_equipo, nombre, pais FROM team WHERE id_equipo  = ?";
         Team equipo = null; // por si no se encuentra nada
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
             stmt.setInt(1, idTeam);

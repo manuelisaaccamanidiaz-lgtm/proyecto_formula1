@@ -43,11 +43,11 @@ public class PilotRepositoryJDBC implements PilotRepository{
             ResultSet rs = stmt.executeQuery(); // aquí SÍ guardas el resultado
             if (rs.next()) {
                 piloto = new Pilot(
-                        rs.getInt("idPiloto"),
+                        rs.getInt("id_piloto"),
                         rs.getString("nombre"),
                         rs.getString("rol"),
-                        rs.getInt("idEquipo"),
-                        rs.getInt("idVehiculo")
+                        rs.getInt("id_equipo"),
+                        rs.getInt("id_vehiculo")
                 );
             }
         } catch (SQLException e) {
@@ -67,11 +67,11 @@ public class PilotRepositoryJDBC implements PilotRepository{
                 // arma un Vehicle igual que en buscarPorId...
                 // y agrégalo a la lista con vehiculos.add(...)
                 Pilot piloto = new Pilot(
-                        rs.getInt("idPiloto"),
+                        rs.getInt("id_piloto"),
                         rs.getString("nombre"),
                         rs.getString("rol"),
-                        rs.getInt("idEquipo"),
-                        rs.getInt("idVehiculo")
+                        rs.getInt("id_equipo"),
+                        rs.getInt("id_vehiculo")
                 );
                 pilotos.add(piloto);
             }

@@ -20,7 +20,7 @@ public class ResultRepositoryJDBC implements ResultRepository {
     //guardar vehiculo con cada dato
     @Override
     public void guardar(Result resultado) {
-        String sql = "INSERT INTO team (tiempo, id_circuito, id_vehiculo) VALUES (?, ?, ? )";
+        String sql = "INSERT INTO result (tiempo, id_circuito, id_vehiculo) VALUES (?, ?, ? )";
         try (PreparedStatement stmt = conexion.prepareStatement(sql)) {
             stmt.setDouble(1, resultado.getTiempo());
             stmt.setInt(2, resultado.getIdCircuito());
@@ -42,10 +42,10 @@ public class ResultRepositoryJDBC implements ResultRepository {
             ResultSet rs = stmt.executeQuery(); // aquí SÍ guardas el resultado
             if (rs.next()) {
                 resultado = new Result(
-                        rs.getInt("idResult"),
+                        rs.getInt("id_result"),
                         rs.getDouble("tiempo"),
-                        rs.getInt("idCircuito"),
-                        rs.getInt("idVehiculo")
+                        rs.getInt("id_circuito"),
+                        rs.getInt("id_vehiculo")
                 );
             }
         } catch (SQLException e) {
@@ -65,10 +65,10 @@ public class ResultRepositoryJDBC implements ResultRepository {
                 // arma un Vehicle igual que en buscarPorId...
                 // y agrégalo a la lista con vehiculos.add(...)
                 Result resultado = new Result(
-                        rs.getInt("idResult"),
+                        rs.getInt("id_result"),
                         rs.getDouble("tiempo"),
-                        rs.getInt("idCircuito"),
-                        rs.getInt("idVehiculo")
+                        rs.getInt("id_circuito"),
+                        rs.getInt("id_vehiculo")
                 );
                 resultados.add(resultado);
             }
