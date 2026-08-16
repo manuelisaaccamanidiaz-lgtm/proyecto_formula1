@@ -2,16 +2,16 @@ package com.formula1.teams;
 
 public class Team {
 
-    private int ID_equipo;
+    private int idEquipo;
     private String nombre;
     private String pais;
 
-    public int getID_equipo() {
-        return ID_equipo;
+    public int getIdEquipo() {
+        return idEquipo;
     }
 
-    public void setID_equipo(int iD_equipo) {
-        ID_equipo = iD_equipo;
+    public void setIdEquipo(int idEquipo) {
+        this.idEquipo = idEquipo;
     }
 
     public String getNombre() {
@@ -30,13 +30,15 @@ public class Team {
         this.pais = pais;
     }
 
-    public Team(int iD_equipo, String nombre, String pais) {
-        ID_equipo = iD_equipo;
+    public Team(int idEquipo, String nombre, String pais) {
+        this.idEquipo = idEquipo;
         this.nombre = nombre;
         this.pais = pais;
     }
 
     public Team() {
     }
+
+    
 
 }

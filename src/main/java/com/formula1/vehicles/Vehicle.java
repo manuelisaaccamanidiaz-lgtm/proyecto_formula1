@@ -19,8 +19,6 @@ public class Vehicle {
         this.idEquipo = idEquipo;
     }
 
-
-
     public int getId_vehiculo() {
         return id_vehiculo;
     }
