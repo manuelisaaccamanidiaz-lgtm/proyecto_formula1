@@ -2,7 +2,9 @@ package com.formula1;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
+
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
 
 import com.formula1.circuitfactories.F1CircuitFactory;
 import com.formula1.circuits.Circuit;
@@ -29,14 +31,14 @@ import com.formula1.teamfactories.FerrariTeamFactory;
 import com.formula1.teamfactories.MercedesTeamFactory;
 import com.formula1.teamfactories.RedBullTeamFactory;
 import com.formula1.teams.Team;
-import com.formula1.vehicles.ModoConduccion;
 import com.formula1.vehiclefactories.MercedesFactory;
 import com.formula1.vehiclefactories.RedBullFactory;
+import com.formula1.vehicles.ModoConduccion;
 import com.formula1.vehicles.Vehicle;
 
 public class Main {
 
-    private static final Scanner sc = new Scanner(System.in);
+    private static final String TITULO = "Simulacion de Formula 1";
 
     private static final CircuitManager circuitManager = new CircuitManager();
     private static final PilotManager pilotManager = new PilotManager();
@@ -47,12 +49,15 @@ public class Main {
     private static final List<Result> recordsHistoricos = new ArrayList<>();
 
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ignored) {
+        }
+
         cargarDatosIniciales();
-        System.out.println("=== Simulacion de Formula 1 ===");
         boolean salir = false;
         while (!salir) {
-            mostrarMenuPrincipal();
-            int opcion = leerEntero("Selecciona una opcion: ");
+            int opcion = leerEntero(menuPrincipalTexto());
             switch (opcion) {
                 case 1: menuCircuitos(); break;
                 case 2: menuPilotos(); break;
@@ -62,11 +67,24 @@ public class Main {
                 case 6: menuSimulacion(); break;
                 case 7: menuHistorial(); break;
                 case 8: menuRecords(); break;
-                case 0: salir = true; System.out.println("Hasta la proxima carrera!"); break;
-                default: System.out.println("Opcion invalida.");
+                case 0: salir = true; mostrar("Hasta la proxima carrera!"); break;
+                default: mostrarError("Opcion invalida.");
             }
         }
-        sc.close();
+    }
+
+    private static String menuPrincipalTexto() {
+        return "=== Simulacion de Formula 1 ===\n\n" +
+                "1. Gestionar circuitos\n" +
+                "2. Gestionar pilotos\n" +
+                "3. Gestionar equipos\n" +
+                "4. Gestionar vehiculos\n" +
+                "5. Configurar un vehiculo\n" +
+                "6. Simular clasificacion\n" +
+                "7. Ver historial de clasificaciones\n" +
+                "8. Ver records de vuelta por circuito\n" +
+                "0. Salir\n\n" +
+                "Selecciona una opcion:";
     }
 
     private static void cargarDatosIniciales() {
@@ -98,75 +116,57 @@ public class Main {
         }
     }
 
-    // MENU PRINCIPAL
-
-    private static void mostrarMenuPrincipal() {
-        System.out.println();
-        System.out.println("------------------------------------------");
-        System.out.println("1. Gestionar circuitos");
-        System.out.println("2. Gestionar pilotos");
-        System.out.println("3. Gestionar equipos");
-        System.out.println("4. Gestionar vehiculos");
-        System.out.println("5. Configurar un vehiculo");
-        System.out.println("6. Simular clasificacion");
-        System.out.println("7. Ver historial de clasificaciones");
-        System.out.println("8. Ver records de vuelta por circuito");
-        System.out.println("0. Salir");
-        System.out.println("------------------------------------------");
-    }
-
     // ---------------------------------------------------------------
     // CIRCUITOS
     // ---------------------------------------------------------------
     private static void menuCircuitos() {
         boolean volver = false;
         while (!volver) {
-            System.out.println("\n-- Gestion de circuitos --");
-            System.out.println("1. Listar  2. Agregar  3. Editar  4. Eliminar  5. Buscar  0. Volver");
-            int op = leerEntero("Opcion: ");
+            int op = leerEntero("-- Gestion de circuitos --\n\n" +
+                    "1. Listar\n2. Agregar\n3. Editar\n4. Eliminar\n5. Buscar\n0. Volver\n\nOpcion:");
             switch (op) {
                 case 1:
-                    for (Circuit c : circuitManager.listar()) System.out.println(c);
+                    mostrar(unirLineas(circuitManager.listar()));
                     break;
                 case 2: {
-                    System.out.print("Nombre: "); String nombre = sc.nextLine();
-                    System.out.print("Pais: "); String pais = sc.nextLine();
-                    double km = leerDouble("Longitud (km): ");
-                    byte vueltas = (byte) leerEntero("Vueltas: ");
-                    System.out.print("Descripcion: "); String desc = sc.nextLine();
+                    String nombre = leerTexto("Nombre:");
+                    String pais = leerTexto("Pais:");
+                    double km = leerDouble("Longitud (km):");
+                    byte vueltas = (byte) leerEntero("Vueltas:");
+                    String desc = leerTexto("Descripcion:");
                     Circuit nuevo = new Circuit(0, nombre, pais, km, vueltas, desc, "-", "-", 0);
                     circuitManager.agregar(nuevo);
-                    System.out.println("Circuito agregado con id " + nuevo.getID_circuito());
+                    mostrar("Circuito agregado con id " + nuevo.getID_circuito());
                     break;
                 }
                 case 3: {
-                    int id = leerEntero("Id del circuito a editar: ");
+                    int id = leerEntero("Id del circuito a editar:");
                     Circuit existente = circuitManager.buscarPorId(id);
-                    if (existente == null) { System.out.println("No existe."); break; }
-                    System.out.print("Nuevo nombre (" + existente.getNombre() + "): "); String nombre = sc.nextLine();
-                    System.out.print("Nuevo pais (" + existente.getPais() + "): "); String pais = sc.nextLine();
-                    double km = leerDouble("Nueva longitud km (" + existente.getLongitud_km() + "): ");
-                    byte vueltas = (byte) leerEntero("Nuevas vueltas (" + existente.getVueltas() + "): ");
+                    if (existente == null) { mostrarError("No existe."); break; }
+                    String nombre = leerTexto("Nuevo nombre (" + existente.getNombre() + "):");
+                    String pais = leerTexto("Nuevo pais (" + existente.getPais() + "):");
+                    double km = leerDouble("Nueva longitud km (" + existente.getLongitud_km() + "):");
+                    byte vueltas = (byte) leerEntero("Nuevas vueltas (" + existente.getVueltas() + "):");
                     Circuit editado = new Circuit(id, nombre.isBlank() ? existente.getNombre() : nombre,
                             pais.isBlank() ? existente.getPais() : pais, km > 0 ? km : existente.getLongitud_km(),
                             vueltas > 0 ? vueltas : existente.getVueltas(), existente.getDescripcion(),
                             existente.getRecordVueltaTiempo(), existente.getRecordVueltaPiloto(), existente.getRecordVueltaAnio());
                     circuitManager.editar(id, editado);
-                    System.out.println("Circuito actualizado.");
+                    mostrar("Circuito actualizado.");
                     break;
                 }
                 case 4: {
-                    int id = leerEntero("Id del circuito a eliminar: ");
-                    System.out.println(circuitManager.eliminar(id) ? "Eliminado." : "No existe.");
+                    int id = leerEntero("Id del circuito a eliminar:");
+                    mostrar(circuitManager.eliminar(id) ? "Eliminado." : "No existe.");
                     break;
                 }
                 case 5: {
-                    System.out.print("Buscar por nombre o pais: "); String texto = sc.nextLine();
-                    circuitManager.buscarPorNombreOPais(texto).forEach(System.out::println);
+                    String texto = leerTexto("Buscar por nombre o pais:");
+                    mostrar(unirLineas(circuitManager.buscarPorNombreOPais(texto)));
                     break;
                 }
                 case 0: volver = true; break;
-                default: System.out.println("Opcion invalida.");
+                default: mostrarError("Opcion invalida.");
             }
         }
     }
@@ -177,48 +177,47 @@ public class Main {
     private static void menuPilotos() {
         boolean volver = false;
         while (!volver) {
-            System.out.println("\n-- Gestion de pilotos --");
-            System.out.println("1. Listar  2. Agregar  3. Editar  4. Eliminar  5. Buscar  0. Volver");
-            int op = leerEntero("Opcion: ");
+            int op = leerEntero("-- Gestion de pilotos --\n\n" +
+                    "1. Listar\n2. Agregar\n3. Editar\n4. Eliminar\n5. Buscar\n0. Volver\n\nOpcion:");
             switch (op) {
                 case 1:
-                    for (Pilot p : pilotManager.listar()) System.out.println(p);
+                    mostrar(unirLineas(pilotManager.listar()));
                     break;
                 case 2: {
-                    System.out.print("Nombre: "); String nombre = sc.nextLine();
-                    System.out.print("Rol (Lider/Escudero): "); String rol = sc.nextLine();
-                    System.out.print("Equipo: "); String equipo = sc.nextLine();
-                    int idEquipo = leerEntero("Id de equipo: ");
-                    int habilidad = leerEntero("Habilidad (1-100): ");
+                    String nombre = leerTexto("Nombre:");
+                    String rol = leerTexto("Rol (Lider/Escudero):");
+                    String equipo = leerTexto("Equipo:");
+                    int idEquipo = leerEntero("Id de equipo:");
+                    int habilidad = leerEntero("Habilidad (1-100):");
                     Pilot nuevo = new Pilot(0, nombre, rol, equipo, idEquipo, habilidad);
                     pilotManager.agregar(nuevo);
-                    System.out.println("Piloto agregado con id " + nuevo.getID_pilot());
+                    mostrar("Piloto agregado con id " + nuevo.getID_pilot());
                     break;
                 }
                 case 3: {
-                    int id = leerEntero("Id del piloto a editar: ");
+                    int id = leerEntero("Id del piloto a editar:");
                     Pilot existente = pilotManager.buscarPorId(id);
-                    if (existente == null) { System.out.println("No existe."); break; }
-                    System.out.print("Nuevo rol (" + existente.getRol() + "): "); String rol = sc.nextLine();
-                    int habilidad = leerEntero("Nueva habilidad (" + existente.getHabilidad() + "): ");
+                    if (existente == null) { mostrarError("No existe."); break; }
+                    String rol = leerTexto("Nuevo rol (" + existente.getRol() + "):");
+                    int habilidad = leerEntero("Nueva habilidad (" + existente.getHabilidad() + "):");
                     Pilot editado = new Pilot(id, existente.getNombre(), rol.isBlank() ? existente.getRol() : rol,
                             existente.getEquipo(), existente.getIdEquipo(), habilidad > 0 ? habilidad : existente.getHabilidad());
                     pilotManager.editar(id, editado);
-                    System.out.println("Piloto actualizado.");
+                    mostrar("Piloto actualizado.");
                     break;
                 }
                 case 4: {
-                    int id = leerEntero("Id del piloto a eliminar: ");
-                    System.out.println(pilotManager.eliminar(id) ? "Eliminado." : "No existe.");
+                    int id = leerEntero("Id del piloto a eliminar:");
+                    mostrar(pilotManager.eliminar(id) ? "Eliminado." : "No existe.");
                     break;
                 }
                 case 5: {
-                    System.out.print("Buscar por nombre o equipo: "); String texto = sc.nextLine();
-                    pilotManager.buscarPorNombreOEquipo(texto).forEach(System.out::println);
+                    String texto = leerTexto("Buscar por nombre o equipo:");
+                    mostrar(unirLineas(pilotManager.buscarPorNombreOEquipo(texto)));
                     break;
                 }
                 case 0: volver = true; break;
-                default: System.out.println("Opcion invalida.");
+                default: mostrarError("Opcion invalida.");
             }
         }
     }
@@ -229,45 +228,44 @@ public class Main {
     private static void menuEquipos() {
         boolean volver = false;
         while (!volver) {
-            System.out.println("\n-- Gestion de equipos --");
-            System.out.println("1. Listar  2. Agregar  3. Editar  4. Eliminar  5. Buscar  0. Volver");
-            int op = leerEntero("Opcion: ");
+            int op = leerEntero("-- Gestion de equipos --\n\n" +
+                    "1. Listar\n2. Agregar\n3. Editar\n4. Eliminar\n5. Buscar\n0. Volver\n\nOpcion:");
             switch (op) {
                 case 1:
-                    for (Team t : teamManager.listar()) System.out.println(t);
+                    mostrar(unirLineas(teamManager.listar()));
                     break;
                 case 2: {
-                    System.out.print("Nombre: "); String nombre = sc.nextLine();
-                    System.out.print("Pais: "); String pais = sc.nextLine();
-                    System.out.print("Motor: "); String motor = sc.nextLine();
+                    String nombre = leerTexto("Nombre:");
+                    String pais = leerTexto("Pais:");
+                    String motor = leerTexto("Motor:");
                     Team nuevo = new Team(0, nombre, pais, motor, new ArrayList<>());
                     teamManager.agregar(nuevo);
-                    System.out.println("Equipo agregado con id " + nuevo.getID_equipo());
+                    mostrar("Equipo agregado con id " + nuevo.getID_equipo());
                     break;
                 }
                 case 3: {
-                    int id = leerEntero("Id del equipo a editar: ");
+                    int id = leerEntero("Id del equipo a editar:");
                     Team existente = teamManager.buscarPorId(id);
-                    if (existente == null) { System.out.println("No existe."); break; }
-                    System.out.print("Nuevo motor (" + existente.getMotor() + "): "); String motor = sc.nextLine();
+                    if (existente == null) { mostrarError("No existe."); break; }
+                    String motor = leerTexto("Nuevo motor (" + existente.getMotor() + "):");
                     Team editado = new Team(id, existente.getNombre(), existente.getPais(),
                             motor.isBlank() ? existente.getMotor() : motor, existente.getIdsPilotos());
                     teamManager.editar(id, editado);
-                    System.out.println("Equipo actualizado.");
+                    mostrar("Equipo actualizado.");
                     break;
                 }
                 case 4: {
-                    int id = leerEntero("Id del equipo a eliminar: ");
-                    System.out.println(teamManager.eliminar(id) ? "Eliminado." : "No existe.");
+                    int id = leerEntero("Id del equipo a eliminar:");
+                    mostrar(teamManager.eliminar(id) ? "Eliminado." : "No existe.");
                     break;
                 }
                 case 5: {
-                    System.out.print("Buscar por nombre o pais: "); String texto = sc.nextLine();
-                    teamManager.buscarPorNombreOPais(texto).forEach(System.out::println);
+                    String texto = leerTexto("Buscar por nombre o pais:");
+                    mostrar(unirLineas(teamManager.buscarPorNombreOPais(texto)));
                     break;
                 }
                 case 0: volver = true; break;
-                default: System.out.println("Opcion invalida.");
+                default: mostrarError("Opcion invalida.");
             }
         }
     }
@@ -278,66 +276,64 @@ public class Main {
     private static void menuVehiculos() {
         boolean volver = false;
         while (!volver) {
-            System.out.println("\n-- Gestion de vehiculos --");
-            System.out.println("1. Listar  2. Agregar  3. Editar  4. Eliminar  5. Buscar  6. Asignar piloto  7. Comparar  0. Volver");
-            int op = leerEntero("Opcion: ");
+            int op = leerEntero("-- Gestion de vehiculos --\n\n" +
+                    "1. Listar\n2. Agregar\n3. Editar\n4. Eliminar\n5. Buscar\n6. Asignar piloto\n7. Comparar\n0. Volver\n\nOpcion:");
             switch (op) {
                 case 1:
-                    for (Vehicle v : vehicleManager.listar()) System.out.println(v);
+                    mostrar(unirLineas(vehicleManager.listar()));
                     break;
                 case 2: {
-                    System.out.print("Motor: "); String motor = sc.nextLine();
-                    System.out.print("Modelo: "); String modelo = sc.nextLine();
-                    double acel = leerDouble("Aceleracion 0-100 (s): ");
-                    int velMax = leerEntero("Velocidad maxima (km/h): ");
-                    System.out.print("Equipo: "); String equipo = sc.nextLine();
+                    String motor = leerTexto("Motor:");
+                    String modelo = leerTexto("Modelo:");
+                    double acel = leerDouble("Aceleracion 0-100 (s):");
+                    int velMax = leerEntero("Velocidad maxima (km/h):");
+                    String equipo = leerTexto("Equipo:");
                     Vehicle nuevo = new Vehicle(0, motor, modelo, acel, velMax);
                     nuevo.setEquipo(equipo);
                     vehicleManager.agregar(nuevo);
-                    System.out.println("Vehiculo agregado con id " + nuevo.getId_vehiculo()
+                    mostrar("Vehiculo agregado con id " + nuevo.getId_vehiculo()
                             + " (perfiles de rendimiento generados automaticamente).");
                     break;
                 }
                 case 3: {
-                    int id = leerEntero("Id del vehiculo a editar: ");
+                    int id = leerEntero("Id del vehiculo a editar:");
                     Vehicle existente = vehicleManager.buscarPorId(id);
-                    if (existente == null) { System.out.println("No existe."); break; }
-                    int velMax = leerEntero("Nueva velocidad maxima (" + existente.getVelocidad_maxima() + "): ");
-                    double acel = leerDouble("Nueva aceleracion (" + existente.getAceleracion() + "): ");
+                    if (existente == null) { mostrarError("No existe."); break; }
+                    int velMax = leerEntero("Nueva velocidad maxima (" + existente.getVelocidad_maxima() + "):");
+                    double acel = leerDouble("Nueva aceleracion (" + existente.getAceleracion() + "):");
                     if (velMax > 0) existente.setVelocidad_maxima(velMax);
                     if (acel > 0) existente.setAceleracion(acel);
                     vehicleManager.editar(id, existente);
-                    System.out.println("Vehiculo actualizado.");
+                    mostrar("Vehiculo actualizado.");
                     break;
                 }
                 case 4: {
-                    int id = leerEntero("Id del vehiculo a eliminar: ");
-                    System.out.println(vehicleManager.eliminar(id) ? "Eliminado." : "No existe.");
+                    int id = leerEntero("Id del vehiculo a eliminar:");
+                    mostrar(vehicleManager.eliminar(id) ? "Eliminado." : "No existe.");
                     break;
                 }
                 case 5: {
-                    System.out.print("Buscar por modelo o equipo: "); String texto = sc.nextLine();
-                    vehicleManager.buscarPorEquipoOModelo(texto).forEach(System.out::println);
+                    String texto = leerTexto("Buscar por modelo o equipo:");
+                    mostrar(unirLineas(vehicleManager.buscarPorEquipoOModelo(texto)));
                     break;
                 }
                 case 6: {
-                    int idVehiculo = leerEntero("Id del vehiculo: ");
-                    int idPiloto = leerEntero("Id del piloto a asignar: ");
-                    System.out.println(vehicleManager.asignarPiloto(idVehiculo, idPiloto) ? "Piloto asignado." : "Vehiculo no encontrado.");
+                    int idVehiculo = leerEntero("Id del vehiculo:");
+                    int idPiloto = leerEntero("Id del piloto a asignar:");
+                    mostrar(vehicleManager.asignarPiloto(idVehiculo, idPiloto) ? "Piloto asignado." : "Vehiculo no encontrado.");
                     break;
                 }
                 case 7: {
-                    System.out.print("Ids de vehiculos a comparar, separados por coma: ");
-                    String linea = sc.nextLine();
+                    String linea = leerTexto("Ids de vehiculos a comparar, separados por coma:");
                     List<Integer> ids = new ArrayList<>();
                     for (String s : linea.split(",")) {
                         try { ids.add(Integer.parseInt(s.trim())); } catch (NumberFormatException ignored) {}
                     }
-                    System.out.println(vehicleManager.comparar(ids));
+                    mostrar(String.valueOf(vehicleManager.comparar(ids)));
                     break;
                 }
                 case 0: volver = true; break;
-                default: System.out.println("Opcion invalida.");
+                default: mostrarError("Opcion invalida.");
             }
         }
     }
@@ -346,36 +342,32 @@ public class Main {
     // CONFIGURACION DEL VEHICULO
     // ---------------------------------------------------------------
     private static void menuConfiguracion() {
-        int idVehiculo = leerEntero("Id del vehiculo a configurar: ");
+        int idVehiculo = leerEntero("Id del vehiculo a configurar:");
         Vehicle v = vehicleManager.buscarPorId(idVehiculo);
-        if (v == null) { System.out.println("No existe ese vehiculo."); return; }
+        if (v == null) { mostrarError("No existe ese vehiculo."); return; }
 
         ConfiguracionVehiculo actual = configManager.obtener(idVehiculo);
-        System.out.println("Configuracion actual -> " + actual);
 
-        System.out.println("Modo de conduccion: 1) NORMAL  2) AGRESIVA  3) AHORRO_COMBUSTIBLE");
-        ModoConduccion modo = switch (leerEntero("Opcion: ")) {
+        ModoConduccion modo = switch (leerEntero("Configuracion actual -> " + actual +
+                "\n\nModo de conduccion:\n1) NORMAL\n2) AGRESIVA\n3) AHORRO_COMBUSTIBLE\n\nOpcion:")) {
             case 2 -> ModoConduccion.AGRESIVA;
             case 3 -> ModoConduccion.AHORRO_COMBUSTIBLE;
             default -> ModoConduccion.NORMAL;
         };
 
-        System.out.println("Carga aerodinamica: 1) BAJA  2) MEDIA  3) ALTA");
-        CargaAerodinamica aero = switch (leerEntero("Opcion: ")) {
+        CargaAerodinamica aero = switch (leerEntero("Carga aerodinamica:\n1) BAJA\n2) MEDIA\n3) ALTA\n\nOpcion:")) {
             case 1 -> CargaAerodinamica.BAJA;
             case 3 -> CargaAerodinamica.ALTA;
             default -> CargaAerodinamica.MEDIA;
         };
 
-        System.out.println("Presion de neumaticos: 1) BAJA  2) ESTANDAR  3) ALTA");
-        PresionNeumaticos presion = switch (leerEntero("Opcion: ")) {
+        PresionNeumaticos presion = switch (leerEntero("Presion de neumaticos:\n1) BAJA\n2) ESTANDAR\n3) ALTA\n\nOpcion:")) {
             case 1 -> PresionNeumaticos.BAJA;
             case 3 -> PresionNeumaticos.ALTA;
             default -> PresionNeumaticos.ESTANDAR;
         };
 
-        System.out.println("Estrategia de combustible: 1) AGRESIVA  2) BALANCEADA  3) AHORRO");
-        EstrategiaCombustible combustible = switch (leerEntero("Opcion: ")) {
+        EstrategiaCombustible combustible = switch (leerEntero("Estrategia de combustible:\n1) AGRESIVA\n2) BALANCEADA\n3) AHORRO\n\nOpcion:")) {
             case 1 -> EstrategiaCombustible.AGRESIVA;
             case 3 -> EstrategiaCombustible.AHORRO;
             default -> EstrategiaCombustible.BALANCEADA;
@@ -383,22 +375,22 @@ public class Main {
 
         ConfiguracionVehiculo nueva = new ConfiguracionVehiculo(idVehiculo, modo, aero, presion, combustible);
         configManager.guardar(nueva);
-        System.out.println("Configuracion guardada -> " + nueva);
+        mostrar("Configuracion guardada -> " + nueva);
     }
 
     // ---------------------------------------------------------------
     // SIMULACION DE CLASIFICACION
     // ---------------------------------------------------------------
     private static void menuSimulacion() {
+        StringBuilder listaCircuitos = new StringBuilder("Circuitos disponibles:\n\n");
         for (Circuit c : circuitManager.listar()) {
-            System.out.println(c.getID_circuito() + ". " + c.getNombre());
+            listaCircuitos.append(c.getID_circuito()).append(". ").append(c.getNombre()).append("\n");
         }
-        int idCircuito = leerEntero("Elige el id del circuito para la clasificacion: ");
+        int idCircuito = leerEntero(listaCircuitos + "\nElige el id del circuito para la clasificacion:");
         Circuit circuito = circuitManager.buscarPorId(idCircuito);
-        if (circuito == null) { System.out.println("No existe ese circuito."); return; }
+        if (circuito == null) { mostrarError("No existe ese circuito."); return; }
 
         Clima clima = Clima.aleatorio();
-        System.out.println("Clima de la sesion: " + clima);
 
         List<Participante> participantes = new ArrayList<>();
         for (Vehicle v : vehicleManager.listar()) {
@@ -412,62 +404,87 @@ public class Main {
         }
 
         if (participantes.isEmpty()) {
-            System.out.println("No hay pilotos con vehiculo asignado. Asigna pilotos a un vehiculo primero (menu 4, opcion 6).");
+            mostrarError("No hay pilotos con vehiculo asignado. Asigna pilotos a un vehiculo primero (menu 4, opcion 6).");
             return;
         }
 
         SimuladorClasificacion simulador = new SimuladorClasificacion();
         List<ResultadoClasificacion> resultados = simulador.simular(circuito, participantes, clima);
 
-        System.out.println("\n-- Resultado de clasificacion en " + circuito.getNombre() + " (" + clima + ") --");
+        StringBuilder sb = new StringBuilder();
+        sb.append("-- Resultado de clasificacion en ").append(circuito.getNombre())
+                .append(" (").append(clima).append(") --\n\n");
         for (ResultadoClasificacion r : resultados) {
-            System.out.println(r);
+            sb.append(r).append("\n");
         }
-
         historial.guardar(circuito.getNombre(), clima, resultados);
-        System.out.println("(Sesion guardada en el historial)");
+        sb.append("\n(Sesion guardada en el historial)");
+        mostrar(sb.toString());
     }
 
     private static void menuHistorial() {
         List<SesionClasificacion> sesiones = historial.listar();
-        if (sesiones.isEmpty()) { System.out.println("Aun no hay sesiones simuladas."); return; }
+        if (sesiones.isEmpty()) { mostrar("Aun no hay sesiones simuladas."); return; }
+        StringBuilder sb = new StringBuilder();
         for (SesionClasificacion s : sesiones) {
-            System.out.println("\nSesion #" + s.getIdSesion() + " - " + s.getCircuito() + " - Clima: " + s.getClima());
+            sb.append("\nSesion #").append(s.getIdSesion()).append(" - ").append(s.getCircuito())
+                    .append(" - Clima: ").append(s.getClima()).append("\n");
             for (ResultadoClasificacion r : s.getResultados()) {
-                System.out.println("  " + r);
+                sb.append("  ").append(r).append("\n");
+            }
+        }
+        mostrar(sb.toString());
+    }
+
+    private static void menuRecords() {
+        mostrar("-- Records de vuelta por circuito --\n\n" + unirLineas(recordsHistoricos));
+    }
+
+    // ---------------------------------------------------------------
+    // Utilidades de lectura / muestra con JOptionPane
+    // ---------------------------------------------------------------
+    private static int leerEntero(String mensaje) {
+        while (true) {
+            String input = JOptionPane.showInputDialog(null, mensaje, TITULO, JOptionPane.QUESTION_MESSAGE);
+            if (input == null || input.isBlank()) return 0;
+            try {
+                return Integer.parseInt(input.trim());
+            } catch (NumberFormatException e) {
+                mostrarError("Ingresa un numero entero valido.");
             }
         }
     }
 
-    private static void menuRecords() {
-        System.out.println("\n-- Records de vuelta por circuito --");
-        for (Result r : recordsHistoricos) {
-            System.out.println(r);
-        }
-    }
-
-    // ---------------------------------------------------------------
-    // Utilidades de lectura
-    // ---------------------------------------------------------------
-    private static int leerEntero(String mensaje) {
-        System.out.print(mensaje);
-        while (!sc.hasNextInt()) {
-            sc.next();
-            System.out.print("Ingresa un numero valido: ");
-        }
-        int valor = sc.nextInt();
-        sc.nextLine();
-        return valor;
-    }
-
     private static double leerDouble(String mensaje) {
-        System.out.print(mensaje);
-        while (!sc.hasNextDouble()) {
-            sc.next();
-            System.out.print("Ingresa un numero valido: ");
+        while (true) {
+            String input = JOptionPane.showInputDialog(null, mensaje, TITULO, JOptionPane.QUESTION_MESSAGE);
+            if (input == null || input.isBlank()) return 0;
+            try {
+                return Double.parseDouble(input.trim().replace(",", "."));
+            } catch (NumberFormatException e) {
+                mostrarError("Ingresa un numero valido.");
+            }
         }
-        double valor = sc.nextDouble();
-        sc.nextLine();
-        return valor;
+    }
+
+    private static String leerTexto(String mensaje) {
+        String input = JOptionPane.showInputDialog(null, mensaje, TITULO, JOptionPane.QUESTION_MESSAGE);
+        return input == null ? "" : input.trim();
+    }
+
+    private static void mostrar(String mensaje) {
+        JOptionPane.showMessageDialog(null, mensaje, TITULO, JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private static void mostrarError(String mensaje) {
+        JOptionPane.showMessageDialog(null, mensaje, TITULO, JOptionPane.ERROR_MESSAGE);
+    }
+
+    private static <T> String unirLineas(Iterable<T> items) {
+        StringBuilder sb = new StringBuilder();
+        for (T item : items) {
+            sb.append(item).append("\n");
+        }
+        return sb.length() == 0 ? "No hay elementos registrados." : sb.toString();
     }
 }
