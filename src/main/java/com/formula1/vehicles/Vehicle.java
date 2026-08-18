@@ -1,5 +1,8 @@
 package com.formula1.vehicles;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Vehicle {
 
     private int id_vehiculo;
@@ -7,6 +10,8 @@ public class Vehicle {
     private String modelo;
     private double aceleracion;
     private int velocidad_maxima;
+    private String equipo;
+    private List<Integer> idsPilotos = new ArrayList<>();
 
     public int getId_vehiculo() {
         return id_vehiculo;
@@ -48,6 +53,25 @@ public class Vehicle {
         this.velocidad_maxima = velocidad_maxima;
     }
 
+    public String getEquipo() {
+        return equipo;
+    }
+
+    public void setEquipo(String equipo) {
+        this.equipo = equipo;
+    }
+
+    public List<Integer> getIdsPilotos() {
+        return idsPilotos;
+    }
+
+    /** Asigna un piloto a este vehiculo (evita duplicados). */
+    public void asignarPiloto(int idPiloto) {
+        if (!idsPilotos.contains(idPiloto)) {
+            idsPilotos.add(idPiloto);
+        }
+    }
+
     public Vehicle(int id_vehiculo, String motor, String modelo, double aceleracion, int velocidad_maxima) {
         this.id_vehiculo = id_vehiculo;
         this.motor = motor;
@@ -59,4 +83,9 @@ public class Vehicle {
     public Vehicle() {
     }
 
+    @Override
+    public String toString() {
+        return String.format("#%d %s %s - Equipo: %s | Vel.Max: %d km/h | Acel 0-100: %.1fs | Pilotos: %s",
+                id_vehiculo, motor, modelo, equipo, velocidad_maxima, aceleracion, idsPilotos);
+    }
 }

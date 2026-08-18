@@ -49,4 +49,11 @@ public class Result {
     public Result() {
     }
 
+    @Override
+    public String toString() {
+        int minutos = (int) (record_vuelta / 60);
+        double segundos = record_vuelta % 60;
+        return String.format("%s -> Record de vuelta: %d:%06.3f - Ganador historico: %s",
+                circuito, minutos, segundos, ganador);
+    }
 }
