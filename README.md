@@ -1,4 +1,4 @@
-**# Simulador de Formula 1
+ # Simulador de Formula 1
 
 Proyecto en Java que combina:
 
