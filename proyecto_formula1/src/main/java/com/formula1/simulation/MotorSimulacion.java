@@ -197,6 +197,7 @@ public class MotorSimulacion {
         return vehiculos;
     }
 
+<<<<<<< HEAD
     /**
      * PROPUESTA (ampliada a pedido del enunciado): antes este rango era
      * +/-2%, igual al de SimuladorClasificacion. Para que el ganador pueda
@@ -208,5 +209,9 @@ public class MotorSimulacion {
      */
     public double sortearVariacionCarrera() {
         return 0.95 + random.nextDouble() * 0.10; // +/-5%
+=======
+    public double sortearVariacionCarrera() {
+        return 0.98 + random.nextDouble() * 0.04; // mismo rango que SimuladorClasificacion.simular (+/-2%)
+>>>>>>> 172cf7defab89d315d8e4c14da82520809b98f82
     }
 }

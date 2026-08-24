@@ -40,6 +40,7 @@ public class F1CircuitFactory implements CircuitFactory {
                     "Un circuito desafiante con un diseno en forma de ocho, famoso por sus curvas de alta "
                             + "velocidad como 130R y la 'S' de Senna.",
                     "1:30.983", "Lewis Hamilton", 2019);
+<<<<<<< HEAD
             case 8 -> new Circuit(8, "Circuito Urbano de Bakú", "Azerbaiyán", 6.00, (byte) 51,
                     "Circuito callejero extremadamente largo y angosto, con la recta mas larga del "
                             + "calendario y un sector medieval de curvas cerradas junto al castillo.",
@@ -52,6 +53,8 @@ public class F1CircuitFactory implements CircuitFactory {
                     "Circuito moderno inspirado en varios trazados clasicos, con un primer sector de "
                             + "curvas tipo 'eses' y fuertes cambios de elevacion.",
                     "1:36.169", "Valtteri Bottas", 2019);
+=======
+>>>>>>> 172cf7defab89d315d8e4c14da82520809b98f82
             default -> null;
         };
     }

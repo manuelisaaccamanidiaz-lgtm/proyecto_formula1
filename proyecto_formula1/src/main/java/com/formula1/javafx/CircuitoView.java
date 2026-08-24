@@ -5,18 +5,25 @@ import java.util.List;
 import com.formula1.circuits.Circuit;
 import com.formula1.model.EstadoVehiculo;
 
+<<<<<<< HEAD
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
+=======
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+>>>>>>> 172cf7defab89d315d8e4c14da82520809b98f82
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 /**
  * Representacion visual del circuito y de los vehiculos sobre el.
  *
+<<<<<<< HEAD
  * A diferencia de la version original (un unico ovalo generico para todos
  * los circuitos), aqui cada circuito tiene su propio trazado
  * ({@link TrazadosPistaFactory#obtener(int)}), asi que la forma de la pista
@@ -27,6 +34,27 @@ import javafx.scene.text.FontWeight;
  */
 public class CircuitoView {
 
+=======
+ * El trazado se dibuja como un ovalo estilizado (Canvas + strokeOval), que es
+ * la misma tecnica que ya traia el prototipo original de RaceTrackApp. Cada
+ * vehiculo se ubica sobre ese ovalo segun su angulo actual
+ * (EstadoVehiculo.getAnguloRad()), que a su vez viene directamente del
+ * progreso calculado por MotorSimulacion — es decir, la posicion visual SI
+ * corresponde al estado real de la simulacion, no a una animacion aparte.
+ *
+ * PROPUESTA: el circuito real del proyecto (Circuit) no trae coordenadas de
+ * trazado (rectas/curvas/sectores), solo nombre/pais/longitud/vueltas. Por
+ * eso se usa un ovalo generico para representarlo; si se desea un trazado
+ * fiel a cada circuito (Monaco, Spa, Monza, etc.) habria que modelar esas
+ * coordenadas como un dato nuevo, que hoy no existe en el proyecto.
+ */
+public class CircuitoView {
+
+    private static final double CENTRO_X = 480;
+    private static final double CENTRO_Y = 320;
+    private static final double RX_EXTERIOR = 420;
+    private static final double RY_EXTERIOR = 240;
+>>>>>>> 172cf7defab89d315d8e4c14da82520809b98f82
     private static final double ANCHO_PISTA = 40;
 
     private final Canvas canvas;
@@ -35,6 +63,7 @@ public class CircuitoView {
         this.canvas = canvas;
     }
 
+<<<<<<< HEAD
     /**
      * Dibuja unicamente el trazado y el encabezado del circuito (sin
      * vehiculos ni cartel de ganador). Se usa para mostrar una imagen de
@@ -55,12 +84,21 @@ public class CircuitoView {
     public void dibujar(Circuit circuito, List<EstadoVehiculo> vehiculos, boolean finalizado, EstadoVehiculo ganador) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         TrazadoPista trazado = TrazadosPistaFactory.obtener(circuito.getID_circuito());
+=======
+    public void dibujar(Circuit circuito, List<EstadoVehiculo> vehiculos, boolean finalizado, EstadoVehiculo ganador) {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+>>>>>>> 172cf7defab89d315d8e4c14da82520809b98f82
 
         gc.setFill(Color.web("#0b0e14"));
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
+<<<<<<< HEAD
         dibujarPista(trazado);
         dibujarVehiculos(trazado, vehiculos);
+=======
+        dibujarPista();
+        dibujarVehiculos(vehiculos);
+>>>>>>> 172cf7defab89d315d8e4c14da82520809b98f82
         dibujarEncabezado(circuito);
 
         if (finalizado && ganador != null) {
@@ -68,6 +106,7 @@ public class CircuitoView {
         }
     }
 
+<<<<<<< HEAD
     private void dibujarPista(TrazadoPista trazado) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         List<Point2D> puntos = trazado.getPuntos();
@@ -140,6 +179,59 @@ public class CircuitoView {
             gc.setStroke(Color.WHITE);
             gc.setLineWidth(1);
             gc.strokeOval(posicion.getX() - 6, posicion.getY() - 6, 12, 12);
+=======
+    private void dibujarPista() {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        double rxInterior = RX_EXTERIOR - ANCHO_PISTA;
+        double ryInterior = RY_EXTERIOR - ANCHO_PISTA;
+
+        gc.setStroke(Color.web("#d73a49"));
+        gc.setLineWidth(ANCHO_PISTA + 8);
+        gc.strokeOval(CENTRO_X - (RX_EXTERIOR - ANCHO_PISTA / 2), CENTRO_Y - (RY_EXTERIOR - ANCHO_PISTA / 2),
+                (RX_EXTERIOR - ANCHO_PISTA / 2) * 2, (RY_EXTERIOR - ANCHO_PISTA / 2) * 2);
+
+        gc.setStroke(Color.web("#1f242d"));
+        gc.setLineWidth(ANCHO_PISTA);
+        gc.strokeOval(CENTRO_X - (RX_EXTERIOR - ANCHO_PISTA / 2), CENTRO_Y - (RY_EXTERIOR - ANCHO_PISTA / 2),
+                (RX_EXTERIOR - ANCHO_PISTA / 2) * 2, (RY_EXTERIOR - ANCHO_PISTA / 2) * 2);
+
+        gc.setStroke(Color.web("#30363d"));
+        gc.setLineWidth(1.5);
+        gc.setLineDashes(10, 10);
+        gc.strokeOval(CENTRO_X - (RX_EXTERIOR - ANCHO_PISTA / 2), CENTRO_Y - (RY_EXTERIOR - ANCHO_PISTA / 2),
+                (RX_EXTERIOR - ANCHO_PISTA / 2) * 2, (RY_EXTERIOR - ANCHO_PISTA / 2) * 2);
+        gc.setLineDashes(null);
+
+        gc.setStroke(Color.web("#8b949e"));
+        gc.setLineWidth(1.5);
+        gc.strokeOval(CENTRO_X - RX_EXTERIOR, CENTRO_Y - RY_EXTERIOR, RX_EXTERIOR * 2, RY_EXTERIOR * 2);
+        gc.strokeOval(CENTRO_X - rxInterior, CENTRO_Y - ryInterior, rxInterior * 2, ryInterior * 2);
+
+        // Linea de salida / meta
+        double metaYExt = CENTRO_Y - RY_EXTERIOR;
+        double metaYInt = CENTRO_Y - ryInterior;
+        gc.setStroke(Color.WHITE);
+        gc.setLineWidth(4);
+        gc.strokeLine(CENTRO_X, metaYExt, CENTRO_X, metaYInt);
+    }
+
+    private void dibujarVehiculos(List<EstadoVehiculo> vehiculos) {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        for (EstadoVehiculo estado : vehiculos) {
+            double proporcion = estado.getCarril() / 9.0;
+            double rx = RX_EXTERIOR - 6 - proporcion * (ANCHO_PISTA - 12);
+            double ry = rx * (RY_EXTERIOR / RX_EXTERIOR);
+
+            double theta = estado.getAnguloRad();
+            double x = CENTRO_X + rx * Math.sin(theta);
+            double y = CENTRO_Y - ry * Math.cos(theta);
+
+            gc.setFill(estado.getColor());
+            gc.fillOval(x - 6, y - 6, 12, 12);
+            gc.setStroke(Color.WHITE);
+            gc.setLineWidth(1);
+            gc.strokeOval(x - 6, y - 6, 12, 12);
+>>>>>>> 172cf7defab89d315d8e4c14da82520809b98f82
         }
     }
 
@@ -153,6 +245,7 @@ public class CircuitoView {
 
     private void dibujarCartelGanador(EstadoVehiculo ganador) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
+<<<<<<< HEAD
         double centroX = canvas.getWidth() / 2.0;
         double centroY = canvas.getHeight() / 2.0;
 
@@ -165,10 +258,25 @@ public class CircuitoView {
         gc.setFill(Color.web("#3fb950"));
         gc.setFont(Font.font("System", FontWeight.BOLD, 20));
         gc.fillText("¡GANADOR DE LA CARRERA!", centroX - 150, centroY - 10);
+=======
+        gc.setFill(Color.web("#000000", 0.75));
+        gc.fillRect(CENTRO_X - 190, CENTRO_Y - 45, 380, 90);
+        gc.setStroke(Color.web("#3fb950"));
+        gc.setLineWidth(2);
+        gc.strokeRect(CENTRO_X - 190, CENTRO_Y - 45, 380, 90);
+
+        gc.setFill(Color.web("#3fb950"));
+        gc.setFont(Font.font("System", FontWeight.BOLD, 20));
+        gc.fillText("¡GANADOR DE LA CARRERA!", CENTRO_X - 150, CENTRO_Y - 10);
+>>>>>>> 172cf7defab89d315d8e4c14da82520809b98f82
 
         gc.setFill(Color.WHITE);
         gc.setFont(Font.font("System", FontWeight.BOLD, 16));
         gc.fillText(ganador.getParticipante().getPiloto().getNombre() + " (" + ganador.getEquipo() + ")",
+<<<<<<< HEAD
                 centroX - 150, centroY + 20);
+=======
+                CENTRO_X - 150, CENTRO_Y + 20);
+>>>>>>> 172cf7defab89d315d8e4c14da82520809b98f82
     }
 }

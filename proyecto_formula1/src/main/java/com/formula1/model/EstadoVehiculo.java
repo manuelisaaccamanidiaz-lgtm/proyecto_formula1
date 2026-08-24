@@ -50,6 +50,7 @@ public class EstadoVehiculo {
      */
     private final double variacionCarrera;
 
+<<<<<<< HEAD
     /**
      * Nivel de combustible con el que arranca la carrera (elegido por el
      * usuario en la pantalla de configuracion de carrera, 100.0 por
@@ -69,13 +70,23 @@ public class EstadoVehiculo {
 
     public EstadoVehiculo(Participante participante, String equipo, Color color, int carril, double variacionCarrera,
                            double combustibleInicialPorcentaje) {
+=======
+    // --- PROPUESTA: consumibles a lo largo de la carrera ---
+    private double combustiblePorcentaje = 100.0;
+    private double desgasteNeumaticosPorcentaje = 0.0;
+
+    public EstadoVehiculo(Participante participante, String equipo, Color color, int carril, double variacionCarrera) {
+>>>>>>> 172cf7defab89d315d8e4c14da82520809b98f82
         this.participante = participante;
         this.equipo = equipo;
         this.color = color;
         this.carril = carril;
         this.variacionCarrera = variacionCarrera;
+<<<<<<< HEAD
         this.combustibleInicialPorcentaje = combustibleInicialPorcentaje;
         this.combustiblePorcentaje = combustibleInicialPorcentaje;
+=======
+>>>>>>> 172cf7defab89d315d8e4c14da82520809b98f82
     }
 
     /** Avanza el vehiculo segun su velocidad angular (rad/seg) durante dtSeg segundos. */
@@ -107,7 +118,11 @@ public class EstadoVehiculo {
         ultimaVueltaSeg = null;
         mejorVueltaSeg = null;
         tiempoTotalSeg = 0.0;
+<<<<<<< HEAD
         combustiblePorcentaje = combustibleInicialPorcentaje;
+=======
+        combustiblePorcentaje = 100.0;
+>>>>>>> 172cf7defab89d315d8e4c14da82520809b98f82
         desgasteNeumaticosPorcentaje = 0.0;
     }
 
