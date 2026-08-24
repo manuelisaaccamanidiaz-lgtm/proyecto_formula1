@@ -1,23 +1,32 @@
 package com.formula1.javafx;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.formula1.circuitfactories.F1CircuitFactory;
-import com.formula1.circuits.Circuit;
 import com.formula1.config.CargaAerodinamica;
 import com.formula1.config.ConfiguracionManager;
 import com.formula1.config.ConfiguracionVehiculo;
 import com.formula1.config.EstrategiaCombustible;
 import com.formula1.config.PresionNeumaticos;
 import com.formula1.factories.VehicleFactory;
+import com.formula1.javafx.gestion.PanelCircuitos;
+import com.formula1.javafx.gestion.PanelConfiguracionVehiculo;
+import com.formula1.javafx.gestion.PanelEquipos;
+import com.formula1.javafx.gestion.PanelHistorial;
+import com.formula1.javafx.gestion.PanelPilotos;
+import com.formula1.javafx.gestion.PanelRecords;
+import com.formula1.javafx.gestion.PanelSimulacionClasificacion;
+import com.formula1.javafx.gestion.PanelVehiculos;
 import com.formula1.managers.CircuitManager;
 import com.formula1.managers.PilotManager;
 import com.formula1.managers.TeamManager;
 import com.formula1.managers.VehicleManager;
-import com.formula1.menu.OperacionesMenu;
 import com.formula1.pilotfactories.F1PilotFactory;
+import com.formula1.resultfactories.F1ResultFactory;
 import com.formula1.results.Result;
 import com.formula1.simulation.ConfiguracionCarrera;
 import com.formula1.simulation.HistorialClasificacion;
@@ -47,13 +56,16 @@ import javafx.animation.SequentialTransition;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -63,21 +75,18 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
- * Punto de entrada JavaFX principal del proyecto: un menu con tematica de
- * Formula 1 (fondo oscuro, acentos rojo/checkered) cuyos botones equivalen
- * uno a uno a las opciones del menu de texto de {@code Main.java}, mas el
- * boton destacado "A RODAR!" que abre la seleccion de pista/clima/gasolina
- * y lanza la carrera en tiempo real ({@link VistaCarreraEnVivo}).
+ * Punto de entrada JavaFX principal del proyecto: pantalla de carga con el
+ * logo, y luego un menu con barra lateral izquierda (tematica F1) cuyas
+ * opciones muestran su contenido AL LADO DERECHO de la misma ventana -
+ * nada de JOptionPane. Cada seccion (circuitos, pilotos, equipos,
+ * vehiculos, configuracion, simulacion, historial, records) es un panel
+ * JavaFX propio dentro de {@code com.formula1.javafx.gestion}, con su
+ * propia tabla y formulario embebidos.
  *
- * Los botones de gestion (circuitos, pilotos, equipos, vehiculos,
- * configuracion, simulacion de clasificacion, historial, records) delegan
- * en {@link OperacionesMenu}, la MISMA logica que usa Main.java por
- * consola (evita duplicar el CRUD dos veces). Esos dialogos siguen siendo
- * JOptionPane, igual que en el proyecto original; solo cambia que ahora se
- * disparan desde un boton en vez de un menu de texto numerado. Main.java
- * ya invocaba JOptionPane desde el hilo main() (que tampoco es el AWT
- * Event Dispatch Thread); aqui se hace exactamente lo mismo pero desde el
- * hilo de aplicacion de JavaFX, con el mismo resultado practico.
+ * El unico lugar donde sigue existiendo JOptionPane en el proyecto es
+ * {@code Main.java} (la version de consola), que usa
+ * {@code com.formula1.menu.OperacionesMenu} porque, al ser una app 100%
+ * de consola, no tiene otra superficie donde mostrar dialogos.
  */
 public class MenuPrincipalApp extends Application {
 
@@ -89,16 +98,15 @@ public class MenuPrincipalApp extends Application {
     private final HistorialClasificacion historial = new HistorialClasificacion();
     private final List<Result> recordsHistoricos = new ArrayList<>();
 
-    private OperacionesMenu operaciones;
     private Stage stage;
     private VistaCarreraEnVivo vistaCarreraActual;
+    private StackPane areaContenido;
+    private final Map<String, Button> botonesBarraLateral = new LinkedHashMap<>();
 
     @Override
     public void start(Stage stage) {
         this.stage = stage;
         cargarDatosDelProyecto();
-        operaciones = new OperacionesMenu(circuitManager, pilotManager, teamManager, vehicleManager,
-                configManager, historial, recordsHistoricos);
 
         stage.setTitle("Simulador de Formula 1");
         Scene scene = new Scene(construirPantallaCarga(), 1400, 760);
@@ -114,8 +122,7 @@ public class MenuPrincipalApp extends Application {
         StackPane fondo = new StackPane();
         fondo.setStyle("-fx-background-color: linear-gradient(to bottom, #0b0e14, #14181f, #0b0e14);");
 
-        ImageView logo = new ImageView(new Image(
-                getClass().getResourceAsStream("/images/logo-f1.png")));
+        ImageView logo = new ImageView(new Image(getClass().getResourceAsStream("/images/logo-f1.png")));
         logo.setPreserveRatio(true);
         logo.setFitWidth(420);
         logo.setScaleX(0.05);
@@ -139,7 +146,6 @@ public class MenuPrincipalApp extends Application {
         contenido.setAlignment(Pos.CENTER);
         fondo.getChildren().add(contenido);
 
-        // El logo crece lento y fluido, como si estuviera cargando.
         ScaleTransition crecer = new ScaleTransition(Duration.seconds(2.6), logo);
         crecer.setFromX(0.05);
         crecer.setFromY(0.05);
@@ -176,83 +182,142 @@ public class MenuPrincipalApp extends Application {
     }
 
     // -----------------------------------------------------------------
-    // Menu principal con botones tematizados
+    // Menu principal: barra lateral izquierda + contenido a la derecha
     // -----------------------------------------------------------------
     private BorderPane construirMenuPrincipal() {
-        BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: #0b0e14;");
+        BorderPane raiz = new BorderPane();
+        raiz.setStyle("-fx-background-color: #0b0e14;");
 
-        VBox encabezado = new VBox(4);
-        encabezado.setAlignment(Pos.CENTER);
-        encabezado.setPadding(new Insets(28, 0, 18, 0));
-        encabezado.setStyle("-fx-background-color: linear-gradient(to bottom, #d32026, #0b0e14);");
-        Label titulo = new Label("SIMULADOR DE FORMULA 1");
-        titulo.setFont(Font.font("System", FontWeight.BOLD, 30));
+        raiz.setLeft(construirBarraLateral());
+
+        areaContenido = new StackPane();
+        areaContenido.setStyle("-fx-background-color: #0b0e14;");
+        ScrollPane scroll = new ScrollPane(areaContenido);
+        scroll.setFitToWidth(true);
+        scroll.setFitToHeight(true);
+        scroll.setStyle("-fx-background: #0b0e14; -fx-background-color: #0b0e14;");
+        raiz.setCenter(scroll);
+
+        mostrarPantallaBienvenidaMenu();
+        return raiz;
+    }
+
+    private VBox construirBarraLateral() {
+        VBox barra = new VBox();
+        barra.setPrefWidth(260);
+        barra.setMinWidth(260);
+        barra.setStyle("-fx-background-color: #11161d; -fx-border-color: #21262d; -fx-border-width: 0 1 0 0;");
+        barra.setPadding(new Insets(20, 14, 20, 14));
+        barra.setSpacing(6);
+
+        Label titulo = new Label("FORMULA 1");
+        titulo.setFont(Font.font("System", FontWeight.BOLD, 18));
         titulo.setTextFill(Color.WHITE);
-        Label subtitulo = new Label("Gestiona la temporada o salta directo a la pista");
-        subtitulo.setFont(Font.font("System", 14));
-        subtitulo.setTextFill(Color.web("#f5dde0"));
-        encabezado.getChildren().addAll(titulo, subtitulo);
-        root.setTop(encabezado);
+        Label subtitulo = new Label("Panel de gestion");
+        subtitulo.setFont(Font.font("System", 11));
+        subtitulo.setTextFill(Color.web("#8b949e"));
+        VBox encabezado = new VBox(2, titulo, subtitulo);
+        encabezado.setPadding(new Insets(4, 0, 20, 6));
 
-        GridPane grilla = new GridPane();
-        grilla.setAlignment(Pos.CENTER);
-        grilla.setHgap(18);
-        grilla.setVgap(18);
-        grilla.setPadding(new Insets(30));
+        barra.getChildren().add(encabezado);
+        barra.getChildren().add(botonBarraLateral("Gestionar circuitos",
+                () -> mostrarPanel(new PanelCircuitos(circuitManager).construirVista())));
+        barra.getChildren().add(botonBarraLateral("Gestionar pilotos",
+                () -> mostrarPanel(new PanelPilotos(pilotManager).construirVista())));
+        barra.getChildren().add(botonBarraLateral("Gestionar equipos",
+                () -> mostrarPanel(new PanelEquipos(teamManager).construirVista())));
+        barra.getChildren().add(botonBarraLateral("Gestionar vehiculos",
+                () -> mostrarPanel(new PanelVehiculos(vehicleManager).construirVista())));
+        barra.getChildren().add(botonBarraLateral("Configurar un vehiculo",
+                () -> mostrarPanel(new PanelConfiguracionVehiculo(vehicleManager, configManager).construirVista())));
+        barra.getChildren().add(botonBarraLateral("Simular clasificacion",
+                () -> mostrarPanel(new PanelSimulacionClasificacion(circuitManager, pilotManager, vehicleManager,
+                        configManager, historial).construirVista())));
+        barra.getChildren().add(botonBarraLateral("Historial de clasificaciones",
+                () -> mostrarPanel(new PanelHistorial(historial).construirVista())));
+        barra.getChildren().add(botonBarraLateral("Records de vuelta",
+                () -> mostrarPanel(new PanelRecords(recordsHistoricos).construirVista())));
 
-        grilla.add(botonMenu("Gestionar circuitos", operaciones::menuCircuitos), 0, 0);
-        grilla.add(botonMenu("Gestionar pilotos", operaciones::menuPilotos), 1, 0);
-        grilla.add(botonMenu("Gestionar equipos", operaciones::menuEquipos), 2, 0);
-        grilla.add(botonMenu("Gestionar vehiculos", operaciones::menuVehiculos), 0, 1);
-        grilla.add(botonMenu("Configurar un vehiculo", operaciones::menuConfiguracion), 1, 1);
-        grilla.add(botonMenu("Simular clasificacion", operaciones::menuSimulacion), 2, 1);
-        grilla.add(botonMenu("Ver historial de clasificaciones", operaciones::menuHistorial), 0, 2);
-        grilla.add(botonMenu("Ver records de vuelta", operaciones::menuRecords), 1, 2);
-        grilla.add(botonSalir(), 2, 2);
+        Region espacio = new Region();
+        VBox.setVgrow(espacio, Priority.ALWAYS);
+        barra.getChildren().add(espacio);
 
-        VBox centro = new VBox(24);
-        centro.setAlignment(Pos.CENTER);
-        centro.getChildren().addAll(grilla, botonARodar());
-        root.setCenter(centro);
-        return root;
+        Button botonARodar = new Button("¡A RODAR!");
+        botonARodar.setMaxWidth(Double.MAX_VALUE);
+        botonARodar.setPrefHeight(56);
+        botonARodar.setFont(Font.font("System", FontWeight.BOLD, 16));
+        botonARodar.setStyle("-fx-background-color: #d32026; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand;");
+        botonARodar.setOnMouseEntered(e -> botonARodar.setStyle(
+                "-fx-background-color: #ff2d33; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand;"));
+        botonARodar.setOnMouseExited(e -> botonARodar.setStyle(
+                "-fx-background-color: #d32026; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand;"));
+        botonARodar.setOnAction(e -> abrirConfiguracionYArrancarCarrera());
+
+        Button botonSalir = new Button("Salir");
+        botonSalir.setMaxWidth(Double.MAX_VALUE);
+        botonSalir.setPrefHeight(40);
+        botonSalir.setFont(Font.font("System", FontWeight.BOLD, 13));
+        botonSalir.setStyle("-fx-background-color: #21262d; -fx-text-fill: #f0f6fc; -fx-background-radius: 8; -fx-cursor: hand;");
+        botonSalir.setOnAction(e -> stage.close());
+
+        VBox acciones = new VBox(10, botonARodar, botonSalir);
+        acciones.setPadding(new Insets(16, 0, 0, 0));
+        barra.getChildren().add(acciones);
+
+        return barra;
     }
 
-    private Button botonMenu(String texto, Runnable accion) {
+    /** Boton de la barra lateral: al hacer click, cambia el contenido de la derecha y se marca como activo. */
+    private Button botonBarraLateral(String texto, Runnable accion) {
         Button boton = new Button(texto);
-        boton.setPrefSize(340, 64);
-        boton.setFont(Font.font("System", FontWeight.BOLD, 14));
-        boton.setStyle("-fx-background-color: #161b22; -fx-text-fill: #f0f6fc; -fx-background-radius: 8; "
-                + "-fx-border-color: #30363d; -fx-border-radius: 8; -fx-cursor: hand;");
-        boton.setOnMouseEntered(e -> boton.setStyle("-fx-background-color: #21262d; -fx-text-fill: #f0f6fc; "
-                + "-fx-background-radius: 8; -fx-border-color: #d32026; -fx-border-radius: 8; -fx-cursor: hand;"));
-        boton.setOnMouseExited(e -> boton.setStyle("-fx-background-color: #161b22; -fx-text-fill: #f0f6fc; "
-                + "-fx-background-radius: 8; -fx-border-color: #30363d; -fx-border-radius: 8; -fx-cursor: hand;"));
-        boton.setOnAction(e -> accion.run());
+        boton.setMaxWidth(Double.MAX_VALUE);
+        boton.setAlignment(Pos.CENTER_LEFT);
+        boton.setPrefHeight(42);
+        boton.setFont(Font.font("System", FontWeight.BOLD, 13));
+        aplicarEstiloInactivo(boton);
+        boton.setOnAction(e -> {
+            accion.run();
+            marcarActivo(texto);
+        });
+        botonesBarraLateral.put(texto, boton);
         return boton;
     }
 
-    private Button botonSalir() {
-        Button boton = new Button("Salir");
-        boton.setPrefSize(340, 64);
-        boton.setFont(Font.font("System", FontWeight.BOLD, 14));
-        boton.setStyle("-fx-background-color: #21262d; -fx-text-fill: #f0f6fc; -fx-background-radius: 8; "
-                + "-fx-border-color: #30363d; -fx-border-radius: 8; -fx-cursor: hand;");
-        boton.setOnAction(e -> stage.close());
-        return boton;
+    private void aplicarEstiloInactivo(Button boton) {
+        boton.setStyle("-fx-background-color: transparent; -fx-text-fill: #c9d1d9; -fx-background-radius: 6; -fx-cursor: hand;");
     }
 
-    private Button botonARodar() {
-        Button boton = new Button("¡A RODAR!");
-        boton.setPrefSize(420, 84);
-        boton.setFont(Font.font("System", FontWeight.BOLD, 22));
-        boton.setStyle("-fx-background-color: #d32026; -fx-text-fill: white; -fx-background-radius: 12; -fx-cursor: hand;");
-        boton.setOnMouseEntered(e -> boton.setStyle(
-                "-fx-background-color: #ff2d33; -fx-text-fill: white; -fx-background-radius: 12; -fx-cursor: hand;"));
-        boton.setOnMouseExited(e -> boton.setStyle(
-                "-fx-background-color: #d32026; -fx-text-fill: white; -fx-background-radius: 12; -fx-cursor: hand;"));
-        boton.setOnAction(e -> abrirConfiguracionYArrancarCarrera());
-        return boton;
+    private void aplicarEstiloActivo(Button boton) {
+        boton.setStyle("-fx-background-color: #21262d; -fx-text-fill: white; -fx-border-color: #d32026; "
+                + "-fx-border-width: 0 0 0 3; -fx-background-radius: 6; -fx-cursor: hand;");
+    }
+
+    private void marcarActivo(String texto) {
+        for (Map.Entry<String, Button> entrada : botonesBarraLateral.entrySet()) {
+            if (entrada.getKey().equals(texto)) {
+                aplicarEstiloActivo(entrada.getValue());
+            } else {
+                aplicarEstiloInactivo(entrada.getValue());
+            }
+        }
+    }
+
+    private void mostrarPanel(Node panel) {
+        areaContenido.getChildren().setAll(panel);
+    }
+
+    private void mostrarPantallaBienvenidaMenu() {
+        VBox bienvenida = new VBox(10);
+        bienvenida.setAlignment(Pos.CENTER);
+        Label titulo = new Label("Elige una opcion en el menu de la izquierda");
+        titulo.setFont(Font.font("System", FontWeight.BOLD, 20));
+        titulo.setTextFill(Color.WHITE);
+        Label subtitulo = new Label("o presiona ¡A RODAR! para largar una carrera.");
+        subtitulo.setFont(Font.font("System", 14));
+        subtitulo.setTextFill(Color.web("#8b949e"));
+        bienvenida.getChildren().addAll(titulo, subtitulo);
+        bienvenida.setPadding(new Insets(260, 0, 0, 0));
+        mostrarPanel(bienvenida);
     }
 
     // -----------------------------------------------------------------
@@ -311,6 +376,11 @@ public class MenuPrincipalApp extends Application {
             configManager.guardar(new ConfiguracionVehiculo(i,
                     modos[i % modos.length], aeros[i % aeros.length],
                     presiones[i % presiones.length], combustibles[i % combustibles.length]));
+        }
+
+        F1ResultFactory resultFactory = new F1ResultFactory();
+        for (int i = 1; i <= 7; i++) {
+            recordsHistoricos.add(resultFactory.createResult(i));
         }
     }
 

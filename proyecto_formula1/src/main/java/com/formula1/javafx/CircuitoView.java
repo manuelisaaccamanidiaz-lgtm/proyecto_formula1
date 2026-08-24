@@ -35,6 +35,23 @@ public class CircuitoView {
         this.canvas = canvas;
     }
 
+    /**
+     * Dibuja unicamente el trazado y el encabezado del circuito (sin
+     * vehiculos ni cartel de ganador). Se usa para mostrar una imagen de
+     * vista previa de la pista en la pantalla de configuracion de carrera,
+     * antes de que exista ninguna simulacion en curso.
+     */
+    public void dibujarVistaPrevia(Circuit circuito) {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        TrazadoPista trazado = TrazadosPistaFactory.obtener(circuito.getID_circuito());
+
+        gc.setFill(Color.web("#0b0e14"));
+        gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
+        dibujarPista(trazado);
+        dibujarEncabezado(circuito);
+    }
+
     public void dibujar(Circuit circuito, List<EstadoVehiculo> vehiculos, boolean finalizado, EstadoVehiculo ganador) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         TrazadoPista trazado = TrazadosPistaFactory.obtener(circuito.getID_circuito());
