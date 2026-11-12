@@ -1,0 +1,15 @@
+# Compilados de Maven y javac
+target/
+out/
+*.class
+
+# Dependencias de Node
+node_modules/
+
+# IDE
+.idea/
+*.iml
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
